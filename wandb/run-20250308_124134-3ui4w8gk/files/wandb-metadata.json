@@ -1,0 +1,27 @@
+{
+  "os": "Linux-6.11.0-17-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.12.3",
+  "startedAt": "2025-03-08T07:11:34.370962Z",
+  "program": "/mnt/Files/iitm/da6401_assignment1/main.py",
+  "codePath": "main.py",
+  "email": "ch24s016@smail.iitm.ac.in",
+  "root": "/mnt/Files/iitm/da6401_assignment1",
+  "host": "hemnath-ThinkPad-L14-Gen-2",
+  "executable": "/mnt/Files/iitm/da6401_assignment1/venv/bin/python",
+  "codePathLocal": "main.py",
+  "cpu_count": 4,
+  "cpu_count_logical": 8,
+  "disk": {
+    "/": {
+      "total": "304847478784",
+      "used": "104153133056"
+    }
+  },
+  "memory": {
+    "total": "33295056896"
+  },
+  "cpu": {
+    "count": 4,
+    "countLogical": 8
+  }
+}
