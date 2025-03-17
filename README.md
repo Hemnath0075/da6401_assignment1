@@ -88,7 +88,3 @@ The network is trained using a specified optimizer and loss function (categorica
    ```bash
    python train.py
    ```
-
-## License
-
-This project is licensed under the MIT License.
