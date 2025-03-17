@@ -2,6 +2,7 @@ import argparse
 import wandb
 import tensorflow as tf
 from model import NeuralNetwork
+import numpy as np
 
 # Argument parser
 def parse_args():
@@ -9,8 +10,8 @@ def parse_args():
     parser.add_argument('-wp', '--wandb_project', type=str, default='myprojectname', help='WandB project name')
     parser.add_argument('-we', '--wandb_entity', type=str, default='myname', help='WandB entity name')
     parser.add_argument('-d', '--dataset', type=str, choices=['mnist', 'fashion_mnist'], default='fashion_mnist', help='Dataset to use')
-    parser.add_argument('-e', '--epochs', type=int, default=1, help='Number of epochs')
-    parser.add_argument('-b', '--batch_size', type=int, default=4, help='Batch size')
+    parser.add_argument('-e', '--epochs', type=int, default=10, help='Number of epochs')
+    parser.add_argument('-b', '--batch_size', type=int, default=32, help='Batch size')
     parser.add_argument('-l', '--loss', type=str, choices=['mean_squared_error', 'cross_entropy'], default='cross_entropy', help='Loss function')
     parser.add_argument('-o', '--optimizer', type=str, choices=['sgd', 'momentum', 'nag', 'rmsprop', 'adam', 'nadam'], default='sgd', help='Optimizer')
     parser.add_argument('-lr', '--learning_rate', type=float, default=0.1, help='Learning rate')
@@ -35,22 +36,40 @@ def train(args):
 
     # Load dataset
     if args.dataset == 'fashion_mnist':
-        (x_train, y_train), (x_test, y_test) = tf.keras.datasets.fashion_mnist.load_data()
+        (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.fashion_mnist.load_data()
     elif args.dataset == 'mnist':
-        (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+        (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
     else:
         raise ValueError('Choose from mnist or fashion_mnist ...')
 
-    # Preprocess data
-    x_train = x_train.reshape(-1, 784).astype("float32") / 255.0
-    x_test = x_test.reshape(-1, 784).astype("float32") / 255.0
+
+
+    # Normalize pixel values (0-255) -> (0-1)
+
+    train_images = train_images.reshape(train_images.shape[0], -1) / 255.0
+    test_images = test_images.reshape(test_images.shape[0], -1) / 255.0
+
+
+    train_images_splitted = train_images[:54000]
+
+
+    # One-hot encode labels
+    def one_hot_encode(labels, num_classes=10):
+        return np.eye(num_classes)[labels]
+
+    train_labels_splitted = one_hot_encode(train_labels[:54000])
+    test_labels = one_hot_encode(test_labels)
+
+    val_images = train_images[54000:] # 10% from training dataset is 6000 data point taken as validation dataset from training
+    val_labels = one_hot_encode(train_labels[54000:]) # 10% from training dataset labels
+
 
     # Initialize model
     model = NeuralNetwork(
         input_neurons=784,
-        hidden_layers=args.num_layers,
+        hidden_layers=[args.hidden_size] * args.num_layers,
         output_neurons=10,
-        weight_init=args.weight_init,
+        init_wb_method=args.weight_init,
         activation=args.activation,
         learning_rate=args.learning_rate,
         optimizer=args.optimizer,
@@ -60,7 +79,7 @@ def train(args):
     )
 
     # Train model
-    model.train(x_train, y_train, args.epochs, args.batch_size)
+    model.train(train_images_splitted, train_labels_splitted, args.epochs, args.batch_size,X_val=val_images,y_val=val_labels)
 
 if __name__ == '__main__':
     args = parse_args()
